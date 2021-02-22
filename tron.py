@@ -4,20 +4,20 @@ import time
 
 # All Classes
 class Player():
-	def __init__(self, screen, x, y, w, h, dx, dy, tron_path, color):
+	def __init__(self, screen, x, y, width, height, dx, dy, tron_path, color):
 		"""Create player's tron bike."""
 		self.screen = screen
 		self.screen_rect = screen.get_rect()
 		self.x = x
 		self.y = y
-		self.w = w # width
-		self.h = h # height
+		self.width = width 
+		self.height = height 
 		self.dx = dx # velocity in x-direction
 		self.dy = dy # velocity in y-direction
 		self.tron_path = tron_path
 		self.color = color
 		# Player rect
-		self.rect = pygame.Rect(self.x, self.y, self.w, self.h)
+		self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
 	def update_position(self):
 		self.rect[0] += self.dx # changes rect's x-coordinate
@@ -48,7 +48,7 @@ class Scoreboard():
 
 	def update_score(self):
 		text = str(self.player_1_score) + ' - ' + str(self.player_2_score)
-		sb.display_text(text)
+		scoreboard.display_text(text)
 
 	def reset_score(self):
 		self.player_1_score = 0
@@ -57,7 +57,7 @@ class Scoreboard():
 
 	def play_again(self):
 		text = "Rematch?"
-		sb.display_text(text)
+		scoreboard.display_text(text)
 
 
 class Button():
@@ -93,31 +93,31 @@ def reset_tron_paths():
 def new_game():
 	time.sleep(1.5)
 	screen.fill((0,0,0)) # black
-	player_1 = Player(screen, x=200, y=300, w=5, h=5, dx=5, 
+	player_1 = Player(screen, x=200, y=300, width=5, height=5, dx=5, 
 						dy=0, tron_path=tron_path_1, color=PINK) #player 1
-	player_2 = Player(screen, x=800, y=300, w=5, h=5, dx=-5, 
+	player_2 = Player(screen, x=800, y=300, width=5, height=5, dx=-5, 
 						dy=0, tron_path=tron_path_2, color=WHITE) #player 2
 	return player_1, player_2
 
-def check_for_winner(sb):
-	if sb.player_1_score == sb.score_limit:
+def check_for_winner(scoreboard):
+	if scoreboard.player_1_score == scoreboard.score_limit:
 		text = "Player 1 is the winner !!"
-		sb.display_text(text)
+		scoreboard.display_text(text)
 		screen.fill((0,0,0))
 		time.sleep(1.5)
 		return False # returns game_active as False
 
-	elif sb.player_2_score == sb.score_limit:
+	elif scoreboard.player_2_score == scoreboard.score_limit:
 		text = "Player 2 is the winner !!"
-		sb.display_text(text)
+		scoreboard.display_text(text)
 		screen.fill((0,0,0))
 		time.sleep(1.5)
 		return False
 	else:
 		return True # if no winner, returns game_active as True
 
-def ask_to_play_again(screen, sb, yes_button, no_button):
-	sb.play_again()
+def ask_to_play_again(screen, scoreboard, yes_button, no_button):
+	scoreboard.play_again()
 	yes_button.draw_button()
 	no_button.draw_button()
 
@@ -125,7 +125,7 @@ def check_click_events(yes_button, no_button, mouse_x, mouse_y):
 	yes_button_clicked = yes_button.rect.collidepoint(mouse_x, mouse_y)
 	no_button_clicked = no_button.rect.collidepoint(mouse_x, mouse_y)
 	if yes_button_clicked:
-		sb.reset_score()
+		scoreboard.reset_score()
 		global game_active
 		game_active = True
 
@@ -139,21 +139,21 @@ pygame.init()
 screen = pygame.display.set_mode((1000,700))
 pygame.display.set_caption("Tron")
 
-# Player settings
+# Initialize Player settings
 PINK = ((219,62,177)) 
 WHITE = ((255,255,255)) 
 tron_path_1 = [] # List to keep track of rectangles for each player
 tron_path_2 = []
-player_1 = Player(screen, x=200, y=300, w=5, h=5, dx=5, dy=0, 
+player_1 = Player(screen, x=200, y=300, width=5, height=5, dx=5, dy=0, 
 					tron_path=tron_path_1, color=PINK) # player 1
-player_2 = Player(screen, x=800, y=300, w=5, h=5, dx=-5, dy=0, 
+player_2 = Player(screen, x=800, y=300, width=5, height=5, dx=-5, dy=0, 
 					tron_path=tron_path_2, color=WHITE) # player 2
 
 # Walls
 walls = [pygame.Rect(0, 0, 30, 700), pygame.Rect(0, 0, 1000, 30), 
 		pygame.Rect(970, 0, 30, 700), pygame.Rect(0, 670, 1000, 30)]
 # Scoreboard
-sb = Scoreboard(screen)
+scoreboard = Scoreboard(screen)
 # Buttons
 yes_button = Button(screen, x=400, y=400, msg="Yes")
 no_button = Button(screen, x=525, y=400, msg="No")
@@ -212,23 +212,25 @@ while playing:
 		# if player 1 crashes into boundary, own path, or other player's path >> player 2 wins round
 		if player_1.rect.collidelist(walls) != -1 or player_1.rect.collidelist(tron_path_1[:-2]) != -1 \
 		or player_1.rect.collidelist(tron_path_2[:-2])!= -1:
-			sb.player_2_score += 1
-			sb.update_score()
+
+			scoreboard.player_2_score += 1
+			scoreboard.update_score()
 			reset_tron_paths()
 			player_1, player_2 = new_game()
 
 		# if player 2 crashes into walls, own path, or other player's path >> player 1 wins round
 		if player_2.rect.collidelist(walls) != -1 or player_2.rect.collidelist(tron_path_2[:-1]) != -1 \
 		or player_2.rect.collidelist(tron_path_1[:-1])!= -1:
-			sb.player_1_score += 1
-			sb.update_score()
+
+			scoreboard.player_1_score += 1
+			scoreboard.update_score()
 			reset_tron_paths()
 			player_1, player_2 = new_game()
 
 		# check which player won
-		game_active = check_for_winner(sb)
+		game_active = check_for_winner(scoreboard)
 
 	if not game_active:
-		ask_to_play_again(screen, sb, yes_button, no_button)
+		ask_to_play_again(screen, scoreboard, yes_button, no_button)
 
 	pygame.display.flip()
