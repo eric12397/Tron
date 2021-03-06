@@ -1,102 +1,23 @@
 import pygame
 import sys
 import time
-
-# All Classes
-class Player():
-	def __init__(self, screen, x, y, width, height, dx, dy, tron_path, color):
-		"""Create player's tron bike."""
-		self.screen = screen
-		self.screen_rect = screen.get_rect()
-		self.x = x
-		self.y = y
-		self.width = width 
-		self.height = height 
-		self.dx = dx # velocity in x-direction
-		self.dy = dy # velocity in y-direction
-		self.tron_path = tron_path
-		self.color = color
-		# Player rect
-		self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
-
-	def update_position(self):
-		self.rect[0] += self.dx # changes rect's x-coordinate
-		self.rect[1] += self.dy # changes rect's y-coordinate
-		self.tron_path.append(self.rect.copy())
-
-	def draw_player(self):
-		pygame.draw.rect(self.screen, self.color, self.rect)
-
-
-class Scoreboard():
-	def __init__(self, screen):
-		self.screen = screen
-		self.screen_rect = screen.get_rect()
-		self.text_color = (255,255,255) #black
-		self.font = pygame.font.SysFont(None, 96)
-
-		self.player_1_score = 0
-		self.player_2_score = 0
-		self.score_limit = 5
-
-	def display_text(self, text):
-		self.score_image = self.font.render(text, True, self.text_color, (0,0,0))
-		self.score_rect = self.score_image.get_rect()
-		self.score_rect.center = self.screen_rect.center
-		self.screen.blit(self.score_image, self.score_rect)
-		pygame.display.flip()
-
-	def update_score(self):
-		text = str(self.player_1_score) + ' - ' + str(self.player_2_score)
-		scoreboard.display_text(text)
-
-	def reset_score(self):
-		self.player_1_score = 0
-		self.player_2_score = 0
-		screen.fill((0,0,0))
-
-	def play_again(self):
-		text = "Rematch?"
-		scoreboard.display_text(text)
-
-
-class Button():
-    def __init__ (self,screen, x, y, msg):
-        """Set the dimensions and properties of the button."""
-        self.screen = screen
-        self.x = x
-        self.y = y
-        self.width = 50
-        self.height = 30
-        self.button_color = (14,24,41) # black
-        self.text_color = (255, 255, 255) # white
-        self.msg = msg # whatever text the button shows
-        self.font = pygame.font.SysFont(None, 42) #style of font, font size
-        self.rect = pygame.Rect(self.x, self.y, self.width, self.height) # rect of button
-        self.prep_msg()
-
-    def prep_msg(self):
-        self.msg_image = self.font.render(self.msg, True, self.text_color, self.button_color)
-        self.msg_image_rect = self.msg_image.get_rect()
-        self.msg_image_rect.center = self.rect.center
-
-    def draw_button(self):
-        self.screen.fill(self.button_color, self.rect)
-        self.screen.blit(self.msg_image, self.msg_image_rect)
+from player import Player
+from scoreboard import Scoreboard
+from button import Button
 
 # All functions
 def reset_tron_paths():
 	global tron_path_1, tron_path_2
 	tron_path_1 = [] # empty tron path lists
-	tron_path_2 = []
+	tron_path_2 = [] 
 
 def new_game():
 	time.sleep(1.5)
 	screen.fill((0,0,0)) # black
 	player_1 = Player(screen, x=200, y=300, width=5, height=5, dx=5, 
-						dy=0, tron_path=tron_path_1, color=PINK) #player 1
+						dy=0, tron_path=tron_path_1, color=PINK) # player 1
 	player_2 = Player(screen, x=800, y=300, width=5, height=5, dx=-5, 
-						dy=0, tron_path=tron_path_2, color=WHITE) #player 2
+						dy=0, tron_path=tron_path_2, color=WHITE) # player 2
 	return player_1, player_2
 
 def check_for_winner(scoreboard):
@@ -121,11 +42,11 @@ def ask_to_play_again(screen, scoreboard, yes_button, no_button):
 	yes_button.draw_button()
 	no_button.draw_button()
 
-def check_click_events(yes_button, no_button, mouse_x, mouse_y):
+def check_click_events(yes_button, no_button, mouse_x, mouse_y, screen):
 	yes_button_clicked = yes_button.rect.collidepoint(mouse_x, mouse_y)
 	no_button_clicked = no_button.rect.collidepoint(mouse_x, mouse_y)
 	if yes_button_clicked:
-		scoreboard.reset_score()
+		scoreboard.reset_score(screen)
 		global game_active
 		game_active = True
 
@@ -142,8 +63,10 @@ pygame.display.set_caption("Tron")
 # Initialize Player settings
 PINK = ((219,62,177)) 
 WHITE = ((255,255,255)) 
+
 tron_path_1 = [] # List to keep track of rectangles for each player
 tron_path_2 = []
+
 player_1 = Player(screen, x=200, y=300, width=5, height=5, dx=5, dy=0, 
 					tron_path=tron_path_1, color=PINK) # player 1
 player_2 = Player(screen, x=800, y=300, width=5, height=5, dx=-5, dy=0, 
@@ -152,8 +75,10 @@ player_2 = Player(screen, x=800, y=300, width=5, height=5, dx=-5, dy=0,
 # Walls
 walls = [pygame.Rect(0, 0, 30, 700), pygame.Rect(0, 0, 1000, 30), 
 		pygame.Rect(970, 0, 30, 700), pygame.Rect(0, 670, 1000, 30)]
+
 # Scoreboard
 scoreboard = Scoreboard(screen)
+
 # Buttons
 yes_button = Button(screen, x=400, y=400, msg="Yes")
 no_button = Button(screen, x=525, y=400, msg="No")
@@ -170,7 +95,7 @@ while playing:
 
 		elif event.type == pygame.MOUSEBUTTONDOWN:
 			mouse_x, mouse_y = pygame.mouse.get_pos()
-			check_click_events(yes_button, no_button, mouse_x, mouse_y)
+			check_click_events(yes_button, no_button, mouse_x, mouse_y, screen)
 
 		elif event.type == pygame.KEYDOWN:
 			# Player 1 controls
@@ -234,3 +159,5 @@ while playing:
 		ask_to_play_again(screen, scoreboard, yes_button, no_button)
 
 	pygame.display.flip()
+
+
