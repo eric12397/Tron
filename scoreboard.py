@@ -27,6 +27,6 @@ class Scoreboard():
 		self.player_2_score = 0
 		screen.fill((0,0,0))
 
-	def play_again(self):
+	def rematch(self):
 		text = "Rematch?"
 		self.display_text(text)
